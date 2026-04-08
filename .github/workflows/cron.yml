@@ -1,0 +1,27 @@
+name: Scheduled Ping
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # каждые 15 минут (мин час день месяц деньНедели)
+  workflow_dispatch:          # + ручной запуск для теста
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check site
+        run: |
+          STATUS=$(curl -o /dev/null -s -w "%{http_code}" https://github.com/zephyr-m)
+          echo "HTTP Status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "🔴 Site is DOWN!"
+            exit 1
+          fi
+          echo "🟢 Site is UP"
+
+      - name: Notify Telegram
+        if: failure()   # только если упало
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendMessage" \
+            -d chat_id=${{ secrets.TG_CHAT_ID }} \
+            -d text="🔴 ALERT: github.com/zephyr-m недоступен!"
