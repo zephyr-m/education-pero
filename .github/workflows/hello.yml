@@ -1,0 +1,21 @@
+# Имя workflow — видно в табе Actions на GitHub
+name: Hello CI
+
+# КОГДА запускать
+on:
+  push:
+    branches: [main]
+
+# ЧТО делать
+jobs:
+  greet:
+    runs-on: ubuntu-latest    # виртуалка GitHub (бесплатно)
+    steps:
+      - name: Checkout code    # клонирует твой репо внутрь виртуалки
+        uses: actions/checkout@v4
+
+      - name: Say hello
+        run: echo "🔥 CI работает! Коммит ${{ github.sha }}"
+
+      - name: Show files
+        run: ls -la
